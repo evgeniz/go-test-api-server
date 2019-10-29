@@ -9,7 +9,7 @@ import (
 	"time"
 )
 
-func SetRoutes()  {
+func SetRoutes() {
 	http.HandleFunc("/user/create", createUser())
 	http.HandleFunc("/user/get", getUser())
 	http.HandleFunc("/user/deposit", depositUser())
@@ -185,7 +185,9 @@ func depositUser() http.HandlerFunc {
 		if err != nil {
 			panic(err)
 		}
-		db.UserIDs[req.UserId] = true
+		db.UIds.Mx.Lock()
+		db.UIds.Cache[req.UserId] = true
+		db.UIds.Mx.Unlock()
 	}
 }
 
@@ -268,7 +270,9 @@ func transaction() http.HandlerFunc {
 		if err != nil {
 			panic(err)
 		}
-		db.UserIDs[req.UserId] = true
+		db.UIds.Mx.Lock()
+		db.UIds.Cache[req.UserId] = true
+		db.UIds.Mx.Unlock()
 	}
 }
 

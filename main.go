@@ -1,10 +1,10 @@
 package main
 
 import (
-	"log"
-	"net/http"
 	"github.com/evgeniz/test-task-guru-team/db"
 	"github.com/evgeniz/test-task-guru-team/routes"
+	"log"
+	"net/http"
 	"time"
 )
 
@@ -17,11 +17,16 @@ func main() {
 	go func() {
 		for {
 			time.Sleep(10 * time.Second)
-			if len(db.UserIDs) > 0 {
-				for k, v := range db.UserIDs {
+			db.UIds.Mx.Lock()
+			lenIds := len(db.UIds.Cache)
+			db.UIds.Mx.Unlock()
+			if lenIds > 0 {
+				for k, v := range db.UIds.Cache {
 					if v == true {
 						db.DBUpdateUser(routes.NewUserModel(k))
-						delete(db.UserIDs, k)
+						db.UIds.Mx.Lock()
+						delete(db.UIds.Cache, k)
+						db.UIds.Mx.Unlock()
 					}
 				}
 			}

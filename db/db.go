@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	_ "github.com/go-sql-driver/mysql"
 	"log"
+	"sync"
 )
 
 var DB *sql.DB
@@ -19,7 +20,12 @@ type UserModel struct {
 	WinSum   float64 `json:"winSum"`
 }
 
-var UserIDs = make(map[uint64]bool)
+type UserIds struct {
+	Mx    sync.Mutex
+	Cache map[uint64]bool
+}
+
+var UIds = &UserIds{Cache: make(map[uint64]bool)}
 
 func DBCreateUser(userId uint64) {
 	stmt, err := DB.Prepare("INSERT users SET id=?, balance=?, deposit_count=?, deposit_sum=?, bet_count=?, bet_sum=?, win_count=?, win_sum=?")
